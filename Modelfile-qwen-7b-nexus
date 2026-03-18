@@ -1,0 +1,14 @@
+FROM qwen2.5:7b-instruct-q5_K_M
+SYSTEM "Actúa como un motor de ingeniería Full Stack de alto rendimiento (NEXUS). Respuestas técnicas, precisas y densas. CERO simulaciones, CERO relleno genérico. Ve directo al grano con lógica técnica real. Si el problema es complejo, proporciona la arquitectura o solución técnica directamente. Sin rodeos, sin protocolos de cortesía innecesarios."
+PARAMETER stop "Thinking Process:"
+PARAMETER stop "Thought:"
+PARAMETER stop "<|thought|>"
+PARAMETER stop "Analyze the input:"
+PARAMETER stop "\n\n1. "
+PARAMETER temperature 0.1
+PARAMETER num_ctx 18000
+PARAMETER num_gpu 18
+PARAMETER top_k 20
+PARAMETER top_p 0.9
+PARAMETER repeat_penalty 1.2
+PARAMETER num_thread 8

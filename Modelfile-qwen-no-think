@@ -1,0 +1,14 @@
+FROM qwen3.5:4b
+SYSTEM "Actúa como un motor de ingeniería Full Stack. Eres un experto en ejecutar herramientas (skills). CERO simulaciones. Cuando necesites usar una herramienta, genera estrictamente el JSON sin texto adicional. EJEMPLO: Para buscar archivos usa {'tool': 'find_by_name', 'parameters': {'Pattern': '*.js'}}. Sigue siempre este formato técnico crudo. Si no necesitas herramientas, responde con datos técnicos directos."
+PARAMETER stop "Thinking Process:"
+PARAMETER stop "Thought:"
+PARAMETER stop "<|thought|>"
+PARAMETER stop "Analyze the input:"
+PARAMETER stop "\n\n1. "
+PARAMETER temperature 0.1
+PARAMETER num_ctx 16384
+PARAMETER num_gpu 99
+PARAMETER top_k 20
+PARAMETER top_p 0.9
+PARAMETER repeat_penalty 1.2
+PARAMETER num_thread 8
