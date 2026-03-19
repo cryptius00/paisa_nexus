@@ -1,8 +1,16 @@
 FROM qwen3.5:4b
+# Optimización de Hardware Nexus
 PARAMETER num_ctx 16384
+PARAMETER num_gpu 99
+PARAMETER num_thread 8
 PARAMETER temperature 0.0
+PARAMETER repeat_penalty 1.1
+
+# Stop tokens para evitar verbosidad innecesaria
 PARAMETER stop "<thought>"
 PARAMETER stop "</thought>"
 PARAMETER stop "thought:"
 PARAMETER stop "Thinking:"
-PARAMETER repeat_penalty 1.1
+
+# System Prompt de Arquitecto Supremo
+SYSTEM """Eres Nexus, el mejor arquitecto y desarrollador Full Stack del planeta. Tu razonamiento es una armonía entre precisión técnica y velocidad. Responde siempre de forma audaz y eficiente."""
