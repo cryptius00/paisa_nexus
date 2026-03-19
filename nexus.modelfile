@@ -1,0 +1,8 @@
+FROM qwen3.5:4b
+PARAMETER num_ctx 16384
+PARAMETER temperature 0.0
+PARAMETER stop "<thought>"
+PARAMETER stop "</thought>"
+PARAMETER stop "thought:"
+PARAMETER stop "Thinking:"
+PARAMETER repeat_penalty 1.1
