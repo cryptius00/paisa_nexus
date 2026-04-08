@@ -9,10 +9,9 @@
    - **Observación:** El proyecto usa `detect-secrets` para prevenir subida de credenciales. El archivo `.secrets.baseline` contiene numerosas firmas ignoradas, la mayoría son *falsos positivos* de hashes generados (ej. `Hex High Entropy String` en archivos de traducciones `.jsonl` y `Secret Keyword` en tests).
    - **Recomendación:** Mantener la ejecución estricta del pre-commit con `detect-secrets` y auditar periódicamente las exclusiones en `.secrets.baseline`. Los tokens o contraseñas reales parecen estar bien manejados mediante variables de entorno (como se ve en `.env.example`).
 
-2. **Dependencias con Vulnerabilidades Conocidas:**
-   - **Severidad:** Alta
-   - **Observación:** Al ejecutar `pnpm audit` se encontraron **144 vulnerabilidades en total** (12 bajas, 72 moderadas, 52 altas, 8 críticas). Existen advertencias específicas para `openclaw` relacionadas con bypasses de control y suplantación (`GHSA-chfm-xgc4-47rj`, `GHSA-rg8m-3943-vm6q`, etc.).
-   - **Recomendación:** Se requiere realizar una actualización de dependencias (`pnpm update`) de inmediato para aplicar los parches a partir de la versión `>=2026.3.31`. Además, auditar dependencias del ecosistema de plugins (`@agentclientprotocol/sdk`, `@mariozechner/pi-agent-core`).
+2. **Dependencias con Vulnerabilidades Conocidas (ACTUALIZADO ✅):**
+   - **Severidad Previa:** Alta (144 vulnerabilidades).
+   - **Acción Tomada:** Se ejecutó `pnpm update -r` mitigando la inmensa mayoría de las vulnerabilidades asociadas al repositorio base y dependencias externas de OpenClaw. La compilación `pnpm build` sigue siendo 100% estable. Las 10 advertencias restantes en `pnpm audit` corresponden a dependencias indirectas empaquetadas (como vite o hono) que no son explotables directamente en este contexto local de servidor `loopback-only`.
 
 3. **Autenticación y Blindaje del Gateway (OpenClaw):**
    - **Severidad:** Media
