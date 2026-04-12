@@ -1,0 +1,53 @@
+{
+  "version": "2026.4.5",
+  "gateway": {
+    "bind": "loopback",
+    "port": 18789,
+    "auth": {
+      "password": "TU_CONTRASENA_SUPER_SEGURA_NEXUS"
+    }
+  },
+  "models": {
+    "local": {
+      "provider": "ollama",
+      "model": "qwen3.5:4b",
+      "options": {
+        "num_ctx": 16384,
+        "temperature": 0.0
+      }
+    },
+    "cloud": {
+      "provider": "anthropic",
+      "model": "claude-3.5-sonnet",
+      "apiKey": "sk-ant-tu-clave-api-aqui"
+    },
+    "embeddings": {
+      "provider": "ollama",
+      "model": "nomic-embed-text"
+    }
+  },
+  "plugins": {
+    "allow": [
+      "jarvis-hybrid-router",
+      "jarvis-lancedb-memory",
+      "jarvis-os"
+    ]
+  },
+  "sandbox": {
+    "mode": "off",
+    "allowedBinaries": [
+      "git", "npm", "pnpm", "node", "docker", "ast-grep", "gh", "oxlint", "oxfmt"
+    ]
+  },
+  "memory": {
+    "engine": "lancedb",
+    "path": "~/.openclaw/jarvis-memory-vectors"
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "botToken": "TU_TOKEN_TELEGRAM_AQUI",
+      "allowedUsers": ["TU_USUARIO_TELEGRAM"]
+    }
+  }
+}

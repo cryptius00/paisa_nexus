@@ -3,7 +3,9 @@ import process from "process";
 import { defineSkill } from "openclaw/plugin-sdk";
 
 // Lista blanca estricta de binarios permitidos (NO shell commands).
+// ACTUALIZADO (Abril 2026): Arsenal completo de J.A.R.V.I.S.
 const ALLOWED_BINARIES = new Set([
+  // Core
   "git",
   "npm",
   "pnpm",
@@ -12,10 +14,19 @@ const ALLOWED_BINARIES = new Set([
   "ping",
   "ipconfig",
   "ifconfig",
+  // Advanced Tools (AST, Lints, GitHub, Web)
+  "gh",
+  "ast-grep",
+  "oxlint",
+  "oxfmt",
+  "firecrawl",
+  "dbt",
+  "supabase",
+  "playwright",
 ]);
 
-// Helper para Windows: Los ejecutables nativos suelen necesitar su extensión .cmd o .exe
-// cuando se usa spawn sin shell.
+// Helper para Windows 11: Los ejecutables nativos y scripts globales de npm
+// necesitan su extensión .cmd o .exe cuando se usa spawn sin shell.
 function resolveWindowsBinary(bin: string): string {
   if (process.platform !== "win32") return bin;
 
@@ -27,6 +38,15 @@ function resolveWindowsBinary(bin: string): string {
     node: "node.exe",
     ping: "ping.exe",
     ipconfig: "ipconfig.exe",
+    // Arsenal J.A.R.V.I.S. en Windows
+    gh: "gh.exe",
+    "ast-grep": "ast-grep.exe",
+    oxlint: "oxlint.exe",
+    oxfmt: "oxfmt.exe",
+    firecrawl: "firecrawl.cmd", // Asumiendo instalacion via npm i -g firecrawl
+    dbt: "dbt.exe",
+    supabase: "supabase.exe",
+    playwright: "playwright.cmd",
   };
 
   return cmdMap[bin] || bin;
@@ -41,17 +61,21 @@ export default defineSkill({
     {
       name: "jarvis_run_command_safe",
       description:
-        'Ejecuta un programa (binario) con argumentos de forma segura y sin shell. Usa esto en lugar de bash scripts. NOTA: Comandos internos de consola como "dir", "cd" o "echo" no funcionarán; usa herramientas FS de Node o comandos git/npm.',
+        'Ejecuta un programa (binario) con argumentos de forma segura y sin shell. NOTA: Comandos internos de consola como "dir", "cd" o "echo" no funcionarán; usa herramientas FS de Node o comandos del arsenal.',
       schema: {
         type: "object",
         properties: {
-          executable: { type: "string", description: "Binario a ejecutar (ej: pnpm, git, docker)" },
+          executable: {
+            type: "string",
+            description:
+              "Binario a ejecutar. Permitidos: git, npm, pnpm, node, docker, gh, ast-grep, oxlint, oxfmt, firecrawl, dbt, supabase, playwright.",
+          },
           args: {
             type: "array",
             items: { type: "string" },
-            description: 'Array de argumentos a pasar al binario (ej: ["build"], ["status"])',
+            description: 'Array de argumentos a pasar al binario (ej: ["build"], ["pr", "list"])',
           },
-          timeout: { type: "number", description: "Timeout en ms (default 10000)" },
+          timeout: { type: "number", description: "Timeout en ms (default 30000)" }, // Aumentado a 30s para comandos largos
         },
         required: ["executable", "args"],
       },
@@ -67,7 +91,7 @@ export default defineSkill({
             content: [
               {
                 type: "text",
-                text: `ERROR DE SEGURIDAD: El binario "${bin}" no está en la Whitelist segura (git, npm, pnpm, node, docker). Operación denegada por seguridad.`,
+                text: `ERROR DE SEGURIDAD: El binario "${bin}" no está en la Whitelist segura del Arsenal. Operación denegada.`,
               },
             ],
           };
@@ -79,11 +103,11 @@ export default defineSkill({
         );
 
         // 2. Ejecutar mediante spawn, NO EXEC.
-        // Desactivamos 'shell' explícitamente para mitigar subshells (`, ;, ||, &&, $()`).
+        // Desactivamos 'shell' explícitamente para mitigar subshells.
         return new Promise((resolve) => {
           const child = spawn(resolvedBin, input.args, {
             shell: false,
-            timeout: input.timeout || 10000,
+            timeout: input.timeout || 30000,
           });
 
           let stdoutData = "";
