@@ -1,0 +1,20 @@
+{
+  "name": "@openclaw/jarvis-memory",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "openclaw": {
+    "extensions": ["./dist/index.js"]
+  },
+  "scripts": {
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "openclaw": "workspace:*",
+    "@lancedb/lancedb": "^0.27.0"
+  }
+}

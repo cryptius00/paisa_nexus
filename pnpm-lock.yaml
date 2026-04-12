@@ -393,6 +393,21 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
 
+  extensions/jarvis-memory:
+    dependencies:
+      '@lancedb/lancedb':
+        specifier: ^0.27.0
+        version: 0.27.2(apache-arrow@18.1.0)
+      openclaw:
+        specifier: workspace:*
+        version: link:../..
+
+  extensions/jarvis-router:
+    dependencies:
+      openclaw:
+        specifier: workspace:*
+        version: link:../..
+
   extensions/kilocode: {}
 
   extensions/kimi-coding: {}

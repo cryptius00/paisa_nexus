@@ -15,3 +15,6 @@ onlyBuiltDependencies:
   - node-llama-cpp
   - protobufjs
   - sharp
+  - extensions/jarvis-router
+  - extensions/jarvis-memory
+  - skills/jarvis-os

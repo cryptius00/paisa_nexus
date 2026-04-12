@@ -6,7 +6,7 @@
 
 1. **Gestión de Secretos:**
    - **Severidad:** Baja a Media
-   - **Observación:** El proyecto usa `detect-secrets` para prevenir subida de credenciales. El archivo `.secrets.baseline` contiene numerosas firmas ignoradas, la mayoría son *falsos positivos* de hashes generados (ej. `Hex High Entropy String` en archivos de traducciones `.jsonl` y `Secret Keyword` en tests).
+   - **Observación:** El proyecto usa `detect-secrets` para prevenir subida de credenciales. El archivo `.secrets.baseline` contiene numerosas firmas ignoradas, la mayoría son _falsos positivos_ de hashes generados (ej. `Hex High Entropy String` en archivos de traducciones `.jsonl` y `Secret Keyword` en tests).
    - **Recomendación:** Mantener la ejecución estricta del pre-commit con `detect-secrets` y auditar periódicamente las exclusiones en `.secrets.baseline`. Los tokens o contraseñas reales parecen estar bien manejados mediante variables de entorno (como se ve en `.env.example`).
 
 2. **Dependencias con Vulnerabilidades Conocidas (ACTUALIZADO ✅):**
@@ -15,8 +15,8 @@
 
 3. **Autenticación y Blindaje del Gateway (OpenClaw):**
    - **Severidad:** Media
-   - **Observación:** En el documento `SECURITY.md` se establece claramente que los plugins operan bajo un modelo de *trust boundary* completo y tienen permisos de ejecución. La autenticación para la conexión del gateway debe configurarse meticulosamente en localhost o con túneles autenticados (Tailscale). Exponer el puerto del gateway a internet es un riesgo conocido y documentado.
-   - **Recomendación:** Asegurarse de que el gateway en producción esté configurado estrictamente como *loopback-only* (`127.0.0.1`) o con firewall/túnel restringido.
+   - **Observación:** En el documento `SECURITY.md` se establece claramente que los plugins operan bajo un modelo de _trust boundary_ completo y tienen permisos de ejecución. La autenticación para la conexión del gateway debe configurarse meticulosamente en localhost o con túneles autenticados (Tailscale). Exponer el puerto del gateway a internet es un riesgo conocido y documentado.
+   - **Recomendación:** Asegurarse de que el gateway en producción esté configurado estrictamente como _loopback-only_ (`127.0.0.1`) o con firewall/túnel restringido.
 
 ## Fase 2: Auditoría de Arquitectura
 
@@ -53,5 +53,5 @@
 
 3. **Arquitectura de Bundling (Plugins y Extensions):**
    - **Severidad:** Media
-   - **Observación:** Analizando el `package.json` y el uso de `exports`, el proyecto soporta un SDK para plugins muy amplio (`./plugin-sdk/*`). Tener este número de exportaciones no agrupadas (`dist/plugin-sdk/`) es potente pero puede impactar en el tiempo de inicialización fría (*cold start*).
-   - **Recomendación:** Considerar estrategias de *Tree Shaking* y lazy loading en los puntos de entrada para no sobrecargar el gateway cuando se levantan plugins inactivos.
+   - **Observación:** Analizando el `package.json` y el uso de `exports`, el proyecto soporta un SDK para plugins muy amplio (`./plugin-sdk/*`). Tener este número de exportaciones no agrupadas (`dist/plugin-sdk/`) es potente pero puede impactar en el tiempo de inicialización fría (_cold start_).
+   - **Recomendación:** Considerar estrategias de _Tree Shaking_ y lazy loading en los puntos de entrada para no sobrecargar el gateway cuando se levantan plugins inactivos.
