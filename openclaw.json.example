@@ -10,10 +10,11 @@
   "models": {
     "local": {
       "provider": "ollama",
-      "model": "qwen3.5:4b",
+      "model": "qwen2.5-coder:3b",
       "options": {
         "num_ctx": 16384,
-        "temperature": 0.0
+        "temperature": 0.0,
+        "keep_alive": -1
       }
     },
     "cloud": {
@@ -22,8 +23,9 @@
       "apiKey": "sk-ant-tu-clave-api-aqui"
     },
     "embeddings": {
-      "provider": "ollama",
-      "model": "nomic-embed-text"
+      "provider": "openai",
+      "model": "text-embedding-3-small",
+      "apiKey": "sk-tu-clave-openai-aqui"
     }
   },
   "plugins": {
@@ -36,7 +38,7 @@
   "sandbox": {
     "mode": "off",
     "allowedBinaries": [
-      "git", "npm", "pnpm", "node", "docker", "ast-grep", "gh", "oxlint", "oxfmt", "firecrawl", "dbt", "python", "pip"
+      "git", "npm", "pnpm", "node", "docker", "ast-grep", "gh", "oxlint", "oxfmt", "firecrawl", "dbt", "supabase", "playwright", "python", "pip"
     ]
   },
   "memory": {
