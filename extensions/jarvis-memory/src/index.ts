@@ -9,7 +9,9 @@ export default definePlugin({
   description:
     "Memoria Vectorial continua y Meta-Aprendizaje de Herramientas (Tool Experience) en LanceDB.",
   async setup(api) {
-    api.logger.info(`[J.A.R.V.I.S.] 🧠 Conectando Sistema Cognitivo de Memoria y Meta-Aprendizaje (LanceDB)...`);
+    api.logger.info(
+      `[J.A.R.V.I.S.] 🧠 Conectando Sistema Cognitivo de Memoria y Meta-Aprendizaje (LanceDB)...`,
+    );
 
     const memoryDir = path.join(os.homedir(), ".openclaw", "jarvis-memory-vectors");
     const db = await lancedb.connect(memoryDir);
@@ -34,9 +36,17 @@ export default definePlugin({
     }
 
     if (!tableNames.includes(toolsName)) {
-      api.logger.info(`[J.A.R.V.I.S.] 🛠️ Creando nueva tabla de Aprendizaje de Herramientas en LanceDB...`);
+      api.logger.info(
+        `[J.A.R.V.I.S.] 🛠️ Creando nueva tabla de Aprendizaje de Herramientas en LanceDB...`,
+      );
       toolsTable = await db.createTable(toolsName, [
-        { vector: GENESIS_VECTOR, text: "Genesis Tool Experience", toolName: "system", success: 1, timestamp: Date.now() },
+        {
+          vector: GENESIS_VECTOR,
+          text: "Genesis Tool Experience",
+          toolName: "system",
+          success: 1,
+          timestamp: Date.now(),
+        },
       ]);
     } else {
       toolsTable = await db.openTable(toolsName);
@@ -45,11 +55,11 @@ export default definePlugin({
     // 2. RECUPERACIÓN (Tool RAG): Antes de enviar el mensaje, buscar experiencias pasadas de herramientas fallidas
     api.hooks.chat.beforeSend.tapPromise("JarvisToolReflection", async (context) => {
       const lastMessage = context.request.messages[context.request.messages.length - 1];
-      const content = typeof lastMessage?.content === 'string' ? lastMessage.content : '';
+      const content = typeof lastMessage?.content === "string" ? lastMessage.content : "";
 
       // Si detectamos la mención de comandos o herramientas en la intención del usuario
-      const toolKeywords = ['comando', 'ejecuta', 'script', 'docker', 'git', 'pnpm', 'npm', 'run'];
-      const hasToolIntent = toolKeywords.some(kw => content.toLowerCase().includes(kw));
+      const toolKeywords = ["comando", "ejecuta", "script", "docker", "git", "pnpm", "npm", "run"];
+      const hasToolIntent = toolKeywords.some((kw) => content.toLowerCase().includes(kw));
 
       if (hasToolIntent) {
         try {
@@ -58,34 +68,40 @@ export default definePlugin({
           const vector = embedResult.embeddings[0];
 
           if (vector && vector.length > 0) {
-             // Buscar las 3 experiencias de herramientas más similares a esta intención
-             const pastExperiences = await toolsTable
-                .search(vector)
-                .limit(3)
-                .execute();
+            // Buscar las 3 experiencias de herramientas más similares a esta intención
+            const pastExperiences = await toolsTable.search(vector).limit(3).execute();
 
-             // Filtrar experiencias útiles (especialmente los fallos, para evitar cometerlos de nuevo)
-             const relevantFailures = pastExperiences.filter(exp => exp.success === 0 && exp._distance && exp._distance < 0.8);
+            // Filtrar experiencias útiles (especialmente los fallos, para evitar cometerlos de nuevo)
+            const relevantFailures = pastExperiences.filter(
+              (exp) => exp.success === 0 && exp._distance && exp._distance < 0.8,
+            );
 
-             if (relevantFailures.length > 0) {
-                const reflectionPrompt = "\n\n[J.A.R.V.I.S. REFLEXIÓN INTERNA (Memoria a Largo Plazo)]: He intentado comandos similares en el pasado con las siguientes herramientas y fallaron:\n" +
-                  relevantFailures.map(f => `- Herramienta [${f.toolName}]: ${f.text}`).join("\n") +
-                  "\n[Instrucción]: Asegúrate de NO repetir estos errores en tus parámetros (tool calls). Considera usar argumentos diferentes u otra estrategia.";
+            if (relevantFailures.length > 0) {
+              const reflectionPrompt =
+                "\n\n[J.A.R.V.I.S. REFLEXIÓN INTERNA (Memoria a Largo Plazo)]: He intentado comandos similares en el pasado con las siguientes herramientas y fallaron:\n" +
+                relevantFailures.map((f) => `- Herramienta [${f.toolName}]: ${f.text}`).join("\n") +
+                "\n[Instrucción]: Asegúrate de NO repetir estos errores en tus parámetros (tool calls). Considera usar argumentos diferentes u otra estrategia.";
 
-                // Inyectar como mensaje del sistema (System Prompt adaptativo)
-                api.logger.warn(`[J.A.R.V.I.S.] 💡 Inyectando Reflexión de Fallos previos de herramientas al modelo (${relevantFailures.length} encontrados).`);
+              // Inyectar como mensaje del sistema (System Prompt adaptativo)
+              api.logger.warn(
+                `[J.A.R.V.I.S.] 💡 Inyectando Reflexión de Fallos previos de herramientas al modelo (${relevantFailures.length} encontrados).`,
+              );
 
-                // Validar si el primer mensaje es un system prompt para concatenarlo
-                if (context.request.messages[0].role === 'system') {
-                  const systemMsg = context.request.messages[0];
-                  systemMsg.content = (typeof systemMsg.content === 'string' ? systemMsg.content : '') + reflectionPrompt;
-                } else {
-                  context.request.messages.unshift({ role: 'system', content: reflectionPrompt });
-                }
-             }
+              // Validar si el primer mensaje es un system prompt para concatenarlo
+              if (context.request.messages[0].role === "system") {
+                const systemMsg = context.request.messages[0];
+                systemMsg.content =
+                  (typeof systemMsg.content === "string" ? systemMsg.content : "") +
+                  reflectionPrompt;
+              } else {
+                context.request.messages.unshift({ role: "system", content: reflectionPrompt });
+              }
+            }
           }
-        } catch(e: any) {
-          api.logger.debug(`[J.A.R.V.I.S.] (Tool RAG saltado por falta de servicio de embeddings: ${e.message})`);
+        } catch (e: any) {
+          api.logger.debug(
+            `[J.A.R.V.I.S.] (Tool RAG saltado por falta de servicio de embeddings: ${e.message})`,
+          );
         }
       }
     });
@@ -99,7 +115,9 @@ export default definePlugin({
       if (userMessage?.content && botResponse) {
         const textToEmbed = `User: ${userMessage.content}\nJarvis: ${botResponse.text}`;
         try {
-          const embedResult = await api.runtime.services.embeddings.generate({ input: textToEmbed });
+          const embedResult = await api.runtime.services.embeddings.generate({
+            input: textToEmbed,
+          });
           const vector = embedResult.embeddings[0];
 
           if (vector && vector.length > 0) {
@@ -119,32 +137,45 @@ export default definePlugin({
       // analizando si la respuesta final de texto del modelo contiene "Error:", "Command failed", "STDERR" etc.
       // derivados del toolCall que acabamos de hacer.
 
-      if (toolCalls.length > 0 && botResponse && typeof botResponse.text === 'string') {
+      if (toolCalls.length > 0 && botResponse && typeof botResponse.text === "string") {
         for (const toolCall of toolCalls) {
-           if ('name' in toolCall && 'args' in toolCall) {
-              const toolName = String(toolCall.name);
-              const toolArgs = JSON.stringify(toolCall.args);
+          if ("name" in toolCall && "args" in toolCall) {
+            const toolName = String(toolCall.name);
+            const toolArgs = JSON.stringify(toolCall.args);
 
-              // Heurística de Éxito: Si el bot responde con pánico o reporta stderr/error/fail
-              const isFailure = /error|fail|stderr|denegad|no encont|not found|denied|command failed/i.test(botResponse.text);
-              const successStatus = isFailure ? 0 : 1;
+            // Heurística de Éxito: Si el bot responde con pánico o reporta stderr/error/fail
+            const isFailure =
+              /error|fail|stderr|denegad|no encont|not found|denied|command failed/i.test(
+                botResponse.text,
+              );
+            const successStatus = isFailure ? 0 : 1;
 
-              const expText = `Intenté usar la herramienta '${toolName}' con argumentos '${toolArgs}'. El resultado fue ${isFailure ? 'FALLIDO. El bot reportó un error o stderr en su razonamiento posterior.' : 'EXITOSO.'}`;
+            const expText = `Intenté usar la herramienta '${toolName}' con argumentos '${toolArgs}'. El resultado fue ${isFailure ? "FALLIDO. El bot reportó un error o stderr en su razonamiento posterior." : "EXITOSO."}`;
 
-              try {
-                const embedResult = await api.runtime.services.embeddings.generate({ input: expText });
-                const vector = embedResult.embeddings[0];
+            try {
+              const embedResult = await api.runtime.services.embeddings.generate({
+                input: expText,
+              });
+              const vector = embedResult.embeddings[0];
 
-                if (vector && vector.length > 0) {
-                  api.logger.info(`[J.A.R.V.I.S.] 🛠️ Guardando experiencia de uso de herramienta: [${toolName}] (Success: ${successStatus})`);
-                  await toolsTable.add([
-                    { vector: vector, text: expText, toolName: toolName, success: successStatus, timestamp: Date.now() },
-                  ]);
-                }
-              } catch (e: any) {
-                api.logger.debug(`[J.A.R.V.I.S.] (Error guardando tool exp en BD: ${e.message})`);
+              if (vector && vector.length > 0) {
+                api.logger.info(
+                  `[J.A.R.V.I.S.] 🛠️ Guardando experiencia de uso de herramienta: [${toolName}] (Success: ${successStatus})`,
+                );
+                await toolsTable.add([
+                  {
+                    vector: vector,
+                    text: expText,
+                    toolName: toolName,
+                    success: successStatus,
+                    timestamp: Date.now(),
+                  },
+                ]);
               }
-           }
+            } catch (e: any) {
+              api.logger.debug(`[J.A.R.V.I.S.] (Error guardando tool exp en BD: ${e.message})`);
+            }
+          }
         }
       }
     });

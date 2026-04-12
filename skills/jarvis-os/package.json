@@ -7,13 +7,15 @@
   "exports": {
     ".": "./dist/index.js"
   },
-  "openclaw": {
-    "skills": ["./dist/index.js"]
-  },
   "scripts": {
     "build": "tsdown"
   },
   "dependencies": {
     "openclaw": "workspace:*"
+  },
+  "openclaw": {
+    "skills": [
+      "./dist/index.js"
+    ]
   }
 }

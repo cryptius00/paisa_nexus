@@ -7,14 +7,16 @@
   "exports": {
     ".": "./dist/index.js"
   },
-  "openclaw": {
-    "extensions": ["./dist/index.js"]
-  },
   "scripts": {
     "build": "tsdown"
   },
   "dependencies": {
-    "openclaw": "workspace:*",
-    "@lancedb/lancedb": "^0.27.0"
+    "@lancedb/lancedb": "^0.27.0",
+    "openclaw": "workspace:*"
+  },
+  "openclaw": {
+    "extensions": [
+      "./dist/index.js"
+    ]
   }
 }
