@@ -36,7 +36,7 @@
   "sandbox": {
     "mode": "off",
     "allowedBinaries": [
-      "git", "npm", "pnpm", "node", "docker", "ast-grep", "gh", "oxlint", "oxfmt"
+      "git", "npm", "pnpm", "node", "docker", "ast-grep", "gh", "oxlint", "oxfmt", "firecrawl", "dbt", "python", "pip"
     ]
   },
   "memory": {

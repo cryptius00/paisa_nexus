@@ -3,7 +3,7 @@ import process from "process";
 import { defineSkill } from "openclaw/plugin-sdk";
 
 // Lista blanca estricta de binarios permitidos (NO shell commands).
-// ACTUALIZADO (Abril 2026): Arsenal completo de J.A.R.V.I.S.
+// ACTUALIZADO (Abril 2026): Arsenal completo de J.A.R.V.I.S. + Capacidades de Trading (Python)
 const ALLOWED_BINARIES = new Set([
   // Core
   "git",
@@ -23,6 +23,11 @@ const ALLOWED_BINARIES = new Set([
   "dbt",
   "supabase",
   "playwright",
+  // Algorithmic Trading & Data Science
+  "python",
+  "python3",
+  "pip",
+  "pip3",
 ]);
 
 // Helper para Windows 11: Los ejecutables nativos y scripts globales de npm
@@ -43,10 +48,15 @@ function resolveWindowsBinary(bin: string): string {
     "ast-grep": "ast-grep.exe",
     oxlint: "oxlint.exe",
     oxfmt: "oxfmt.exe",
-    firecrawl: "firecrawl.cmd", // Asumiendo instalacion via npm i -g firecrawl
+    firecrawl: "firecrawl.cmd",
     dbt: "dbt.exe",
     supabase: "supabase.exe",
     playwright: "playwright.cmd",
+    // Trading & Python
+    python: "python.exe",
+    python3: "python.exe",
+    pip: "pip.exe",
+    pip3: "pip.exe",
   };
 
   return cmdMap[bin] || bin;
@@ -68,14 +78,15 @@ export default defineSkill({
           executable: {
             type: "string",
             description:
-              "Binario a ejecutar. Permitidos: git, npm, pnpm, node, docker, gh, ast-grep, oxlint, oxfmt, firecrawl, dbt, supabase, playwright.",
+              "Binario a ejecutar. Permitidos: git, npm, pnpm, node, docker, gh, ast-grep, oxlint, oxfmt, firecrawl, dbt, supabase, playwright, python, pip.",
           },
           args: {
             type: "array",
             items: { type: "string" },
-            description: 'Array de argumentos a pasar al binario (ej: ["build"], ["pr", "list"])',
+            description:
+              'Array de argumentos a pasar al binario (ej: ["build"], ["script.py", "--buy"])',
           },
-          timeout: { type: "number", description: "Timeout en ms (default 30000)" }, // Aumentado a 30s para comandos largos
+          timeout: { type: "number", description: "Timeout en ms (default 30000)" },
         },
         required: ["executable", "args"],
       },
