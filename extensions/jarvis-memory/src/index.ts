@@ -16,7 +16,6 @@ export default definePlugin({
     const memoryDir = path.join(os.homedir(), ".openclaw", "jarvis-memory-vectors");
     const db = await lancedb.connect(memoryDir);
 
-    // 1. Tablas de Memoria Episódica y de Herramientas (Tool Experience)
     let episodicTable: lancedb.Table;
     let toolsTable: lancedb.Table;
 
@@ -24,7 +23,29 @@ export default definePlugin({
     const toolsName = "tool_experience";
     const tableNames = await db.tableNames();
 
-    const GENESIS_VECTOR = new Array(384).fill(0.1);
+    // Variable para retener las dimensiones reales del modelo
+    let realVectorDimension = 0;
+
+    try {
+      // Obtener la dimension dinámica del modelo configurado (ej: nomic-embed-text -> 768)
+      // Esto evita fallos estrictos de esquema (Dimension Mismatch) de LanceDB
+      api.logger.info(`[J.A.R.V.I.S.] 🧠 Calculando dimensiones del vector base...`);
+      const genesisEmbed = await api.runtime.services.embeddings.generate({
+        input: "Genesis Memory",
+      });
+      realVectorDimension = genesisEmbed.embeddings[0].length;
+      api.logger.info(
+        `[J.A.R.V.I.S.] 🧠 Modelo de Embedding activo detectado con ${realVectorDimension} dimensiones.`,
+      );
+    } catch (e) {
+      // Fallback a 768 asumiendo nomic-embed-text o mxbai-embed-large
+      api.logger.warn(
+        `[J.A.R.V.I.S.] ⚠️ No se pudo testear embedding al inicio. Asumiendo fallback de 768 dimensiones.`,
+      );
+      realVectorDimension = 768;
+    }
+
+    const GENESIS_VECTOR = new Array(realVectorDimension).fill(0.1);
 
     if (!tableNames.includes(episodicName)) {
       api.logger.info(`[J.A.R.V.I.S.] 💿 Creando nueva tabla de memoria episódica en LanceDB...`);
@@ -57,21 +78,17 @@ export default definePlugin({
       const lastMessage = context.request.messages[context.request.messages.length - 1];
       const content = typeof lastMessage?.content === "string" ? lastMessage.content : "";
 
-      // Si detectamos la mención de comandos o herramientas en la intención del usuario
       const toolKeywords = ["comando", "ejecuta", "script", "docker", "git", "pnpm", "npm", "run"];
       const hasToolIntent = toolKeywords.some((kw) => content.toLowerCase().includes(kw));
 
       if (hasToolIntent) {
         try {
-          // Vectorizar la intención
           const embedResult = await api.runtime.services.embeddings.generate({ input: content });
           const vector = embedResult.embeddings[0];
 
-          if (vector && vector.length > 0) {
-            // Buscar las 3 experiencias de herramientas más similares a esta intención
+          if (vector && vector.length === realVectorDimension) {
             const pastExperiences = await toolsTable.search(vector).limit(3).execute();
 
-            // Filtrar experiencias útiles (especialmente los fallos, para evitar cometerlos de nuevo)
             const relevantFailures = pastExperiences.filter(
               (exp) => exp.success === 0 && exp._distance && exp._distance < 0.8,
             );
@@ -82,12 +99,10 @@ export default definePlugin({
                 relevantFailures.map((f) => `- Herramienta [${f.toolName}]: ${f.text}`).join("\n") +
                 "\n[Instrucción]: Asegúrate de NO repetir estos errores en tus parámetros (tool calls). Considera usar argumentos diferentes u otra estrategia.";
 
-              // Inyectar como mensaje del sistema (System Prompt adaptativo)
               api.logger.warn(
                 `[J.A.R.V.I.S.] 💡 Inyectando Reflexión de Fallos previos de herramientas al modelo (${relevantFailures.length} encontrados).`,
               );
 
-              // Validar si el primer mensaje es un system prompt para concatenarlo
               if (context.request.messages[0].role === "system") {
                 const systemMsg = context.request.messages[0];
                 systemMsg.content =
@@ -108,7 +123,7 @@ export default definePlugin({
 
     // 3. APRENDIZAJE: Interceptar resultados de herramientas y chat (afterReply)
     api.hooks.chat.afterReply.tapPromise("JarvisMemoryIndexer", async (context) => {
-      // 3a. Guardar Memoria Episódica de Chat (Chat general)
+      // 3a. Guardar Memoria Episódica de Chat
       const userMessage = context.request.messages[context.request.messages.length - 1];
       const botResponse = context.reply.parts.find((p) => p.type === "text");
 
@@ -120,30 +135,28 @@ export default definePlugin({
           });
           const vector = embedResult.embeddings[0];
 
-          if (vector && vector.length > 0) {
+          if (vector && vector.length === realVectorDimension) {
             await episodicTable.add([
               { vector: vector, text: textToEmbed, timestamp: Date.now(), type: "chat" },
             ]);
+          } else {
+            api.logger.warn(
+              `[J.A.R.V.I.S.] ⚠️ Vector de diferente dimensión ignorado (Esquema estricto: ${realVectorDimension})`,
+            );
           }
         } catch (e: any) {
           api.logger.debug(`[J.A.R.V.I.S.] (Error guardando chat en BD: ${e.message})`);
         }
       }
 
-      // 3b. Guardar Experiencia de Herramientas (Tool Learning)
+      // 3b. Guardar Experiencia de Herramientas
       const toolCalls = context.reply.parts.filter((p) => p.type === "tool_call");
-      // Evaluamos las respuestas de herramientas generadas (generalmente presentes en el contexto posterior si es un loop)
-      // Como no tenemos un gancho directo post-ejecución-herramienta aquí, inferimos fallos
-      // analizando si la respuesta final de texto del modelo contiene "Error:", "Command failed", "STDERR" etc.
-      // derivados del toolCall que acabamos de hacer.
-
       if (toolCalls.length > 0 && botResponse && typeof botResponse.text === "string") {
         for (const toolCall of toolCalls) {
           if ("name" in toolCall && "args" in toolCall) {
             const toolName = String(toolCall.name);
             const toolArgs = JSON.stringify(toolCall.args);
 
-            // Heurística de Éxito: Si el bot responde con pánico o reporta stderr/error/fail
             const isFailure =
               /error|fail|stderr|denegad|no encont|not found|denied|command failed/i.test(
                 botResponse.text,
@@ -158,7 +171,7 @@ export default definePlugin({
               });
               const vector = embedResult.embeddings[0];
 
-              if (vector && vector.length > 0) {
+              if (vector && vector.length === realVectorDimension) {
                 api.logger.info(
                   `[J.A.R.V.I.S.] 🛠️ Guardando experiencia de uso de herramienta: [${toolName}] (Success: ${successStatus})`,
                 );

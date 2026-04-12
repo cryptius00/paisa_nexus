@@ -15,3 +15,15 @@ Proyecto de IA Autónoma con integración de Telegram, Ollama local y entrenamie
 - **Memoria**: Local Vector Store (RAG) con `nomic-embed-text`.
 
 Ver detalles en [ARCHITECT_NEXUS.md](./ARCHITECT_NEXUS.md).
+
+---
+
+## 🦾 J.A.R.V.I.S. Evolución Autónoma
+
+Paisa Nexus ha sido actualizado con los módulos de Inteligencia Artificial Autónoma (J.A.R.V.I.S.):
+
+- **Enrutador Híbrido (`jarvis-router`)**: Balancea inteligentemente la carga entre tu RTX 3050 local y la nube.
+- **Memoria Vectorial y Tool Learning (`jarvis-memory`)**: Aprende de sus propios errores de compilación y comandos usando LanceDB.
+- **Control Sandboxed del Sistema (`jarvis-os`)**: Ejecuta comandos seguros en tu Windows 11 sin riesgo de RCE.
+
+Para más detalles técnicos de esta implementación, consulta la [Documentación de Arquitectura J.A.R.V.I.S.](docs/JARVIS_NEXUS.md).
