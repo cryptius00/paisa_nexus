@@ -36,7 +36,8 @@
     "allow": [
       "jarvis-hybrid-router",
       "jarvis-lancedb-memory",
-      "jarvis-os"
+      "jarvis-os",
+      "jarvis-consciousness"
     ]
   },
   "sandbox": {

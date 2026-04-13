@@ -393,6 +393,12 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
 
+  extensions/jarvis-consciousness:
+    dependencies:
+      openclaw:
+        specifier: workspace:*
+        version: link:../..
+
   extensions/jarvis-memory:
     dependencies:
       '@lancedb/lancedb':

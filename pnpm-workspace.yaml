@@ -18,3 +18,4 @@ onlyBuiltDependencies:
   - extensions/jarvis-router
   - extensions/jarvis-memory
   - skills/jarvis-os
+  - extensions/jarvis-consciousness
