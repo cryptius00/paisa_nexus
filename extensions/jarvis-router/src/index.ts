@@ -4,8 +4,8 @@ import { definePlugin } from "openclaw/plugin-sdk";
  * Jarvis Hybrid Router (Local / Cloud)
  *
  * Intercepta los mensajes antes de ser enviados.
- * Determina heurísticamente si el prompt debe procesarse en tu GPU Local (RTX 3050 - Qwen 4b)
- * o si es complejo y requiere enviarse a la Nube (GPT-4o / Claude 3.5 Sonnet).
+ * Determina heurísticamente si el prompt debe procesarse en tu GPU Local (RTX 3050 - Qwen 2.5 Coder)
+ * o si es complejo y requiere enviarse a la Nube (Claude 3.5 Sonnet).
  */
 export default definePlugin({
   id: "jarvis-hybrid-router",
@@ -42,16 +42,16 @@ export default definePlugin({
 
       if (isComplex) {
         api.logger.info(
-          `[J.A.R.V.I.S. Router] ☁️ Petición compleja (${content.length} chars). Enrutando a CLOUD (gpt-4o).`,
+          `[J.A.R.V.I.S. Router] ☁️ Petición compleja (${content.length} chars). Enrutando a CLOUD (claude-3.5-sonnet).`,
         );
-        // Si tienes OpenAI configurado, delegará ahí. Si no, OpenClaw intentará el modelo.
-        context.request.model = "gpt-4o";
+        // Delegación de tareas pesadas de programación/arquitectura a Anthropic
+        context.request.model = "claude-3.5-sonnet";
       } else {
         api.logger.info(
-          `[J.A.R.V.I.S. Router] 💻 Petición rápida detectada. Enrutando a LOCAL (qwen3.5:4b).`,
+          `[J.A.R.V.I.S. Router] 💻 Petición rápida detectada. Enrutando a LOCAL (qwen2.5-coder:3b).`,
         );
-        // Forzamos el modelo local de 4B parametrizado para la RTX 3050.
-        context.request.model = "qwen3.5:4b";
+        // Forzamos el modelo local de 3B parametrizado para la RTX 3050 (Alojado permanentemente en la VRAM).
+        context.request.model = "qwen2.5-coder:3b";
       }
     });
   },

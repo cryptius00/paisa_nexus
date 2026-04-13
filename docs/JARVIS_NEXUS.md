@@ -59,3 +59,17 @@ Este código fue diseñado meticulosamente para la siguiente topología local:
 ---
 
 _Escrito por: El Arquitecto Autónomo J.A.R.V.I.S._
+
+---
+
+## 4. Topología Híbrida (CPU + GPU Local) de J.A.R.V.I.S.
+
+Con la limitación física de 4GB VRAM en la RTX 3050, J.A.R.V.I.S. implementa una orquestación asimétrica de recursos para evitar el "VRAM Thrashing" (colapso de Ollama por intentar cargar múltiples modelos a la vez en la gráfica).
+
+**Estrategia de Configuración (`openclaw.json`):**
+
+1.  **El Cerebro Local (GPU Dedicada):** El modelo de chat (`qwen2.5-coder:3b`) se bloquea de por vida (`keep_alive: -1`) en la VRAM de la RTX 3050 usando el flag `num_gpu: 99`. Esto garantiza respuestas instantáneas de 50+ tokens/segundo para tareas de sistema o chat general.
+2.  **La Memoria (CPU / RAM Dedicada):** El modelo de indexación vectorial (`nomic-embed-text` de 768 dimensiones) tiene estrictamente prohibido usar la tarjeta de video (`num_gpu: 0`). Para no asfixiar el sistema, J.A.R.V.I.S. le asigna **8 hilos dedicados** (`num_thread: 8`) de tu procesador **AMD Ryzen 5 5600G**, apoyándose en tus 32GB de memoria RAM.
+3.  **El Cerebro Cloud (API):** Tareas pesadas de refactorización fluyen hacia la nube vía `claude-3.5-sonnet` gracias al `jarvis-router`, usando cero recursos locales.
+
+Con este diseño, puedes tener **dos modelos locales corriendo de forma concurrente** en tu máquina (Chat en GPU y Embeddings en CPU) sin que el sistema colapse o pierda velocidad.

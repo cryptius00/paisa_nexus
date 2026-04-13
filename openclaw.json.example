@@ -14,7 +14,8 @@
       "options": {
         "num_ctx": 16384,
         "temperature": 0.0,
-        "keep_alive": -1
+        "keep_alive": -1,
+        "num_gpu": 99
       }
     },
     "cloud": {
@@ -23,9 +24,12 @@
       "apiKey": "sk-ant-tu-clave-api-aqui"
     },
     "embeddings": {
-      "provider": "openai",
-      "model": "text-embedding-3-small",
-      "apiKey": "sk-tu-clave-openai-aqui"
+      "provider": "ollama",
+      "model": "nomic-embed-text",
+      "options": {
+        "num_gpu": 0,
+        "num_thread": 8
+      }
     }
   },
   "plugins": {
