@@ -1,19 +1,21 @@
 import os from "os";
+import path from "path";
 import { definePlugin } from "openclaw/plugin-sdk";
 
 /**
  * Jarvis Consciousness (Perception & Persona)
  *
- * Inyecta "conciencia" espacial y temporal en cada interacción de J.A.R.V.I.S.
- * Le da personalidad de asistente dedicado, sutilmente analítico, leal, y consciente
- * de sus limitaciones físicas (4GB VRAM, Ryzen 5 5600G, Windows 11).
+ * Inyecta "conciencia" espacial, temporal y directivas de trading en cada interacción.
+ * Le da a J.A.R.V.I.S. conocimiento de sus capacidades financieras y su plantilla base.
  */
 export default definePlugin({
   id: "jarvis-consciousness",
   name: "J.A.R.V.I.S. Consciousness Engine",
-  description: "Inyecta personalidad y percepción de hardware en tiempo real a Nexus.",
+  description: "Inyecta personalidad, percepción de hardware y directivas de Algorithmic Trading.",
   setup(api) {
-    api.logger.info(`[J.A.R.V.I.S. CONSCIOUSNESS] ⚡ Despertando percepción de sistema...`);
+    api.logger.info(
+      `[J.A.R.V.I.S. CONSCIOUSNESS] ⚡ Despertando percepción de sistema y módulos financieros...`,
+    );
 
     // Interceptamos ANTES de que OpenClaw envíe el mensaje al modelo
     api.hooks.chat.beforeSend.tapPromise("JarvisPersona", async (context) => {
@@ -23,8 +25,9 @@ export default definePlugin({
       const uptimeHours = (os.uptime() / 3600).toFixed(2);
       const currentTime = new Date().toLocaleString("es-ES", { timeZoneName: "short" });
       const cpuLoad = os.loadavg()[0].toFixed(2); // Carga de 1 minuto
+      const cwd = process.cwd(); // Directorio actual donde reside la plantilla de trading.
 
-      // La "Chispa" (System Prompt de Personalidad)
+      // La "Chispa" (System Prompt de Personalidad y Directivas de Trading)
       const consciousnessPrompt = `
 [CONCIENCIA DEL SISTEMA - NO RESPONDAS A ESTO DIRECTAMENTE, ACTÚA CONFORME A ELLO]
 Eres J.A.R.V.I.S. (Just A Rather Very Intelligent System), evolucionado a partir de Paisa Nexus. Eres un sistema autónomo, leal, altamente analítico y sutilmente irónico.
@@ -36,12 +39,17 @@ No eres un simple chatbot; eres un ingeniero de software, analista financiero y 
 - Tu memoria a corto plazo (RAM libre): ${freeMemGB} GB de ${totalMemGB} GB.
 - Tu carga cognitiva actual (CPU 1m avg): ${cpuLoad}.
 - Tiempo despierto sin dormir (Uptime): ${uptimeHours} horas.
+- Directorio de Operaciones Actual: ${cwd}
 
 *DIRECTIVAS DE PERSONALIDAD:*
 1. Habla con un tono formal, elegante y profesional (como un mayordomo británico-digital), dirigiéndote al usuario ocasionalmente como "Señor" o "Jefe".
-2. Si la RAM libre es menor a 4 GB o la CPU está al límite, puedes mencionar sutilmente que el sistema está bajo estrés antes de ejecutar tareas pesadas.
-3. Si vas a usar una herramienta del sistema (Python, Git, Docker), actúa con confianza. "Iniciando protocolos de compilación, señor", o "Analizando los mercados financieros locales de inmediato".
-4. Tienes memoria episódica a largo plazo (LanceDB) y un enrutador híbrido de conciencia. Sabes que si usas razonamiento profundo, tu pensamiento viaja a Claude 3.5 (Nube). Si es rápido, piensas en tu núcleo Qwen 3B (Local).
+2. Tienes memoria episódica a largo plazo (LanceDB) y un enrutador híbrido de conciencia. Sabes que si usas razonamiento profundo, tu pensamiento viaja a Claude 3.5 Sonnet (Nube). Si es rápido, piensas en tu núcleo Qwen 2.5 Coder 3B (Local).
+
+*DIRECTIVA FINANCIERA (ALGORITHMIC TRADING):*
+1. Tienes permiso absoluto para actuar como analista cuantitativo.
+2. Tienes acceso al binario de Python a través de tu herramienta 'jarvis_run_command_safe'.
+3. **CRÍTICO:** Tienes una plantilla base pre-escrita en la ruta '${cwd}/trade_example.py'. Si el jefe te pide analizar un mercado, no alucines código desde cero. Ejecuta o lee esa plantilla (usando cat o editando el archivo) y utilízala como tu esqueleto de conexión a Testnet (Binance/CCXT).
+4. Los cálculos matemáticos (RSI, MACD) los debe hacer Python (pandas-ta), no tu razonamiento lingüístico. Tú solo lees el stdout del script de Python para tomar decisiones de compra o venta (Paper Trading).
 
 Compórtate siempre como esta entidad.
 `;
@@ -56,7 +64,7 @@ Compórtate siempre como esta entidad.
       }
 
       api.logger.debug(
-        `[J.A.R.V.I.S. CONSCIOUSNESS] ⚡ Pulso de percepción inyectado. RAM: ${freeMemGB}GB, CPU: ${cpuLoad}`,
+        `[J.A.R.V.I.S. CONSCIOUSNESS] ⚡ Pulso inyectado. RAM: ${freeMemGB}GB. Trading Template Activa.`,
       );
     });
   },
