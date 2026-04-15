@@ -1,7 +1,7 @@
+import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { promises as fs, existsSync } from "node:fs";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,7 +34,7 @@ async function computeHash(inputPaths) {
   const files = [];
   for (const input of inputPaths) {
     if (existsSync(input)) {
-        await walk(input, files);
+      await walk(input, files);
     }
   }
 
@@ -80,11 +80,15 @@ async function run() {
   console.log("Building A2UI bundle...");
 
   // Run tsc
-  const tscResult = spawnSync("pnpm", ["-s", "exec", "tsc", "-p", path.join(A2UI_RENDERER_DIR, "tsconfig.json")], {
-    shell: true,
-    stdio: "inherit",
-    cwd: ROOT_DIR,
-  });
+  const tscResult = spawnSync(
+    "pnpm",
+    ["-s", "exec", "tsc", "-p", path.join(A2UI_RENDERER_DIR, "tsconfig.json")],
+    {
+      shell: true,
+      stdio: "inherit",
+      cwd: ROOT_DIR,
+    },
+  );
 
   if (tscResult.status !== 0) {
     console.error("tsc failed during A2UI bundle.");

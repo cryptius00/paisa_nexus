@@ -1,0 +1,21 @@
+{
+  "name": "@openclaw/jarvis-os-skill",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "openclaw": "workspace:*"
+  },
+  "openclaw": {
+    "skills": [
+      "./dist/index.js"
+    ]
+  }
+}
