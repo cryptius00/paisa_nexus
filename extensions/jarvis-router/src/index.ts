@@ -42,16 +42,14 @@ export default definePlugin({
 
       if (isComplex) {
         api.logger.info(
-          `[J.A.R.V.I.S. Router] ☁️ Petición compleja (${content.length} chars). Enrutando a CLOUD (claude-3.5-sonnet).`,
+          `[J.A.R.V.I.S. Router] ☁️ Petición compleja (${content.length} chars). Enrutando a CLOUD.`,
         );
-        // Delegación de tareas pesadas de programación/arquitectura a Anthropic
-        context.request.model = "claude-3.5-sonnet";
+        // Delegación de tareas pesadas de programación a la configuración "cloud" en openclaw.json
+        context.request.model = "cloud";
       } else {
-        api.logger.info(
-          `[J.A.R.V.I.S. Router] 💻 Petición rápida detectada. Enrutando a LOCAL (qwen2.5-coder:3b).`,
-        );
-        // Forzamos el modelo local de 3B parametrizado para la RTX 3050 (Alojado permanentemente en la VRAM).
-        context.request.model = "qwen2.5-coder:3b";
+        api.logger.info(`[J.A.R.V.I.S. Router] 💻 Petición rápida detectada. Enrutando a LOCAL.`);
+        // Forzamos el modelo mapeado a la llave "local" en openclaw.json (Alojado permanentemente en la VRAM).
+        context.request.model = "local";
       }
     });
   },
